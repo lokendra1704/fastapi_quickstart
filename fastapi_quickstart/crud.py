@@ -94,6 +94,18 @@ def getUserCrudClass(User, UserIn, UserUpdate):
     returns the CRUDUser class which could be customized as per your choice.
     """
     class CRUDUser(CRUDBase[User, UserIn, UserUpdate]):
+
+        def create(self, user: UserIn, db: Session):
+            ''''''
+            temp = user.dict()
+            temp["hashed_password"] = hash(user.password)
+            del temp["password"]
+            db_obj = User(**temp)
+            db.add(db_obj)
+            db.commit()
+            db.refresh(db_obj)
+            return db_obj
+
         def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
             return db.query(User).filter(User.email == email).first()
 
